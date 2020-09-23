@@ -1,0 +1,12 @@
+<DOCTYPE html>
+<html>
+  <head>
+    <title>tag h1</title>   <!--this is Remark, so computer not print this.-->
+  </head>
+    <hr>          <!--<hr>is tag. drawing horizon line.-->
+  <body>
+    <h1>this print your text.</h1>
+    <h2>smaller text than tag h1.</h2>
+    <h3>smaller text than tag h2.</h3>  <!--you can size down with number after h.-->
+  </body>
+</html>
