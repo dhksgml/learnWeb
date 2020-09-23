@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>tooltip</title>
+  </head>
+  <body>
+    <h1 title="your mouse on "we learn about tooltip", you can see this text.">we learn about tooltip<h1>
+    <hr>
+    <h2>take your mouse on text "we learn about tooltip"</h2>
+  </body>
+</html>
