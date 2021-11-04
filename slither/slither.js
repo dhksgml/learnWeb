@@ -1,20 +1,69 @@
 'use strict';
 
 var vcanvas, ctx;
-var sx, sy, sv;
 var r_left, r_right, r_up, r_down;
 var feedArr = [];
+var scl = 10;
 var Snake1;
 
+//Snake
+
+var Snake = function() {
+    this.x = 0;
+    this.y = 0;
+    this.xv = 0;
+    this.yv = 0;
+    this.tailArr = [];
+
+    
+    this.updateSnake = function() {
+        var i;
+
+        for ( i = this.tailArr.length - 1; i > 0; i -= 1){
+            this.tailArr[i] = this.tailArr[i-1];
+        }      
+        this.tailArr[0] = { x: this.x, y: this.y };
+
+        this.x += this.xv * scl;
+        this.y += this.yv * scl;
+
+    
+        if( this.x < 0 ) { this.x = 0 }
+        if( this.x + scl > vcanvas.width ) { this.x = vcanvas.width - scl }
+        if( this.y < 0 ) { this.y = 0 }
+        if( this.y + scl > vcanvas.height ) { this.y = vcanvas.height - scl }
+    }
+
+    this.dir = function( x, y ) {
+        this.xv = x;
+        this.yv = y;
+    }
+
+    this.addTail = function( x, y ) {
+        this.tailArr.push({x:x, y:y})
+    }
+
+    this.drawSnake = function() {
+        var i;
+        for( i = 0; i < this.tailArr.length-1; i+=1 ){
+            ctx.beginPath();
+            ctx.fillStyle = "rgb(125,125,125)";
+            ctx.fillRect(this.tailArr[i].x ,this.tailArr[i].y,scl,scl);
+        }
+
+        ctx.fillStyle = 'black';
+        ctx.fillRect(this.x, this.y, scl, scl);
+    }
+
+    
+}
 function init() {
 
     vcanvas = document.getElementById('myCanvas');
     ctx = vcanvas.getContext('2d');
 
     Snake1 = new Snake();
-    sx = Snake1.x;
-    sy = Snake1.y;
-    sv = Snake1.v;
+
 
     setInterval(gameLoop,100);
     setInterval(createFeed,33);
@@ -24,8 +73,8 @@ function init() {
 
 //feed
 function createFeed() {
-    const fx = Math.floor(Math.random() * vcanvas.width - 10)
-    const fy = Math.floor(Math.random() * vcanvas.height - 10)
+    const fx = Math.floor(Math.random() * vcanvas.width - scl)
+    const fy = Math.floor(Math.random() * vcanvas.height - scl)
     const fc = "#" + parseInt(Math.random() * 0xffffff).toString(16)
     const findX = feedArr.indexOf(fx);
     const findY = feedArr.indexOf(fy);
@@ -39,98 +88,56 @@ function createFeed() {
 function drawFeed() {
     var i;
     for(i = 0; i < feedArr.length; i++){
-        if(feedArr[i].x % 10 == 0 && feedArr[i].y % 10 == 0){
+        if(feedArr[i].x % scl == 0 && feedArr[i].y % scl == 0){
             ctx.fillStyle = feedArr[i].c;
-            ctx.fillRect(feedArr[i].x, feedArr[i].y, 10, 10);
+            ctx.fillRect(feedArr[i].x, feedArr[i].y, scl, scl);
         }
     }
 }
 
-function eatFeed() {
+function eatFeed( snake ) {
     var i;
     for(i = 0; i < feedArr.length; i++){
-        if(feedArr[i].x == sx && feedArr[i].y == sy ){
+        if(feedArr[i].x == snake.x && feedArr[i].y == snake.y ){
+            snake.addTail({x:feedArr[i].x, y:feedArr[i].y});
             feedArr.splice(i,1);
-            return true;
         }
     }
 }
 
-//tail
-function addTail() {
-    if(r_left){Snake1.tail.push({x:sx+10, y:sy})}
-    if(r_right){Snake1.tail.push({x:sx-10, y:sy})}
-    if(r_up){Snake1.tail.push({x:sx, y:sy+10})}
-    if(r_down){Snake1.tail.push({x:sx, y:sy-10})}
-} 
 
-function updateTail() {
-    let i;
-    for(i=0; i < Snake1.tail; i++){
-        Snake1.tail[i].x = sx;
-        Snake1.tail[i].y = sy;
-    }
-}
 
-function drawTail() {
-    ctx.fillStyle = "rgb(122,122,122)";
-    let i;
-    for(i=1; i <= Snake1.tail-1; i++){
-        ctx.fillRect(Snake1[i].x,Snake1[i].y)
-    }
-}
-
-//Snake
-function drawSnake() {
-    ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.fillRect(sx,sy,10,10);
-}
-
-function updateSnake() {
-    if (r_left) { sx -= sv }
-    else if (r_right) { sx += sv }
-    else if (r_up) { sy -= sv }
-    else if (r_down) { sy += sv }
-
-    if( sx < 0 ) { sx = 0 }
-    if( sx + 10 > vcanvas.width ) { sx = vcanvas.width - 10 }
-    if( sy < 0 ) { sy = 0 }
-    if( sy + 10 > vcanvas.height ) { sy = vcanvas.height - 10 }
-}
- 
 function clearCanvas() {
     ctx.clearRect(0,0,vcanvas.width,vcanvas.height);
 }
 
+function update() {
+    if( r_left ) { Snake1.dir (-1, 0)}
+    if( r_right ) { Snake1.dir (1, 0)}
+    if( r_up ) { Snake1.dir (0, -1)}
+    if( r_down ) { Snake1.dir (0, 1)}
+}
+
 function gameLoop() {
     clearCanvas();
-    updateSnake();
-    drawSnake();
+    update();
+    Snake1.updateSnake();
 
     drawFeed();
-    if(eatFeed()){
-        addTail();
-    };
-
-    updateTail();
-    drawTail();
+    eatFeed(Snake1);
+    Snake1.drawSnake();
 }
 
-var Snake = function() {
-    this.x = 0;
-    this.y = 0;
-    this.v = 10;
-    this.tail = [];
-    
-}
+
 
 
 function set_key(event) {
-    if(event.keyCode === 37 ) { r_left = 1; r_up = 0; r_down =0; r_right = 0 }
-    if(event.keyCode === 38 ) { r_up = 1; r_left = 0; r_down =0; r_right = 0 }
-    if(event.keyCode === 39) {  r_right= 1; r_up = 0; r_down =0; r_left = 0 }
-    if(event.keyCode === 40) { r_down = 1; r_up = 0; r_left =0; r_right = 0 }
+    r_left = 0; r_up = 0; r_down =0; r_right = 0;
+
+    if(event.keyCode === 37 ) { r_left = 1; }
+    if(event.keyCode === 38 ) { r_up = 1; }
+    if(event.keyCode === 39) {  r_right= 1; }
+    if(event.keyCode === 40) { r_down = 1; }
 }
 
 document.onkeydown = set_key;
