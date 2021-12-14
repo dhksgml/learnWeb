@@ -122,8 +122,18 @@ function clearCanvas() {
     ctx.clearRect(0,0,vcanvas.width,vcanvas.height);
 }
 
+function stateInfo() {
+    ctx.beginPath();
+    ctx.font = '20pt arial';
+    ctx.fillStyle = 'black';
+    ctx.fillText('스페이스 바를 눌러보세요',15,50);
+}
+
 function gameLoop() {
     clearCanvas();
+
+    stateInfo();
+
     if(sp){
         createBlock();
         createPaticle(rect);
